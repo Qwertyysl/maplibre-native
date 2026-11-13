@@ -515,6 +515,11 @@ void NativeMapView::setMaxPitch(jni::JNIEnv&, jni::jdouble pitch) {
     map->setBounds(BoundOptions().withMaxPitch(pitch));
 }
 
+// Ayuh: the camera's vertical field of view in degrees (Transform clamps it to 0.1-150)
+void NativeMapView::setFieldOfView(jni::JNIEnv&, jni::jdouble degrees) {
+    map->jumpTo(mln::CameraOptions().withFov(degrees));
+}
+
 jni::jdouble NativeMapView::getMaxPitch(jni::JNIEnv&) {
     return *map->getBounds().maxPitch;
 }
@@ -1427,6 +1432,7 @@ void NativeMapView::registerNative(jni::JNIEnv& env) {
         METHOD(&NativeMapView::setMinPitch, "nativeSetMinPitch"),
         METHOD(&NativeMapView::getMinPitch, "nativeGetMinPitch"),
         METHOD(&NativeMapView::setMaxPitch, "nativeSetMaxPitch"),
+        METHOD(&NativeMapView::setFieldOfView, "nativeSetFieldOfView"),
         METHOD(&NativeMapView::getMaxPitch, "nativeGetMaxPitch"),
         METHOD(&NativeMapView::rotateBy, "nativeRotateBy"),
         METHOD(&NativeMapView::setBearing, "nativeSetBearing"),

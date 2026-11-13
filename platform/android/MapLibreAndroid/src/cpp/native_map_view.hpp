@@ -174,6 +174,8 @@ public:
 
     void setMaxPitch(jni::JNIEnv&, jni::jdouble);
 
+    void setFieldOfView(jni::JNIEnv&, jni::jdouble);
+
     jni::jdouble getMaxPitch(jni::JNIEnv&);
 
     void rotateBy(jni::JNIEnv&, jni::jdouble, jni::jdouble, jni::jdouble, jni::jdouble, jni::jlong);

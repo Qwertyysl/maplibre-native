@@ -97,6 +97,9 @@ interface NativeMap {
 
   void setMaxPitch(double pitch);
 
+  /** Ayuh: the vertical field of view of the camera, in degrees (core CameraOptions::fov). */
+  void setFieldOfView(double degrees);
+
   double getMaxPitch();
 
   void resetZoom();

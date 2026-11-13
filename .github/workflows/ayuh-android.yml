@@ -1,0 +1,81 @@
+# Ayuh's build of MapLibre Android: upstream release tag + the small patch on branch `ayuh` (camera pitch up to 85
+# degrees, MapLibreMap.setFieldOfView). Publishes the multiBackend (Vulkan + OpenGL ES) release AAR, as
+# org.maplibre.gl:android-sdk-vulkan-opengl:<platform/android/VERSION>, into the Maven layout on branch `maven`
+# (read by the app from https://raw.githubusercontent.com/Qwertyysl/maplibre-native/maven).
+#
+# A new MapLibre release: rebase `ayuh` onto its tag (git rebase --onto <new tag> <old tag> ayuh), set VERSION to
+# <new version>-ayuh1 and push; this workflow builds and publishes it.
+name: ayuh-android
+
+on:
+  push:
+    branches: [ayuh]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ayuh-android
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 340
+    defaults:
+      run:
+        working-directory: platform/android
+    steps:
+      - name: Free disk space
+        working-directory: /
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/.ghcup /usr/local/share/boost /opt/hostedtoolcache/CodeQL /usr/share/swift
+          df -h /
+
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: npm install
+        run: npm install --ignore-scripts
+
+      - name: Android NDK
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "ndk;28.2.13676358" > /dev/null
+
+      - name: Build and publish (arm64-v8a, armeabi-v7a)
+        run: |
+          ./gradlew --parallel --max-workers=4 -Pmapbox.buildtype=release \
+            "-Pmaplibre.abis=arm64-v8a armeabi-v7a" \
+            -PpublicationRepositoryUrl="file://$PWD/build/maven-repository" \
+            :MapLibreAndroid:publishMultiBackendReleasePublications
+          find build/maven-repository -type f | sort
+
+      - name: Push to branch maven
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION=$(cat VERSION)
+          URL="https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          OUT="$RUNNER_TEMP/maven-out"
+          if git ls-remote --exit-code --heads "$URL" maven > /dev/null; then
+            git clone -q --depth 1 --branch maven "$URL" "$OUT"
+          else
+            mkdir -p "$OUT" && git -C "$OUT" init -q -b maven && git -C "$OUT" remote add origin "$URL"
+          fi
+          cp -r build/maven-repository/. "$OUT/"
+          cd "$OUT"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "android-sdk-vulkan-opengl $VERSION (${GITHUB_SHA::8})"
+          git push -q origin maven

@@ -572,6 +572,16 @@ public final class MapLibreMap {
   }
 
   /**
+   * Ayuh: sets the vertical field of view of the camera, in degrees (MapLibre's default is about 36.87). A wider view
+   * shows the road near the camera wider and makes it narrow faster towards the horizon.
+   *
+   * @param degrees the vertical field of view, 0.1 to 150 degrees
+   */
+  public void setFieldOfView(double degrees) {
+    nativeMapView.setFieldOfView(degrees);
+  }
+
+  /**
    * <p>
    * Gets the maximum Pitch the map can be displayed at.
    * </p>

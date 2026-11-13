@@ -447,6 +447,14 @@ final class NativeMapView implements NativeMap {
   }
 
   @Override
+  public void setFieldOfView(double degrees) {
+    if (checkState("setFieldOfView")) {
+      return;
+    }
+    nativeSetFieldOfView(degrees);
+  }
+
+  @Override
   public double getMaxPitch() {
     if (checkState("getMaxPitch")) {
       return 0;
@@ -1599,6 +1607,8 @@ final class NativeMapView implements NativeMap {
 
   @Keep
   private native void nativeSetMaxPitch(double pitch);
+
+  private native void nativeSetFieldOfView(double degrees);
 
   @Keep
   private native double nativeGetMaxPitch();

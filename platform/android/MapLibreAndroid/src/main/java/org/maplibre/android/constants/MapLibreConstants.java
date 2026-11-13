@@ -146,12 +146,12 @@ public class MapLibreConstants {
   /**
    * The currently supported maximum pitch level.
    */
-  public static final float MAXIMUM_PITCH = 60.0f;
+  public static final float MAXIMUM_PITCH = 85.0f; // Ayuh: 85 as MapLibre GL JS (core allows up to 180)
 
   /**
    * The currently supported maximum tilt value.
    */
-  public static final double MAXIMUM_TILT = 60;
+  public static final double MAXIMUM_TILT = 85; // Ayuh: 85 as MapLibre GL JS
 
   /**
    * The currently supported minimum tilt value.
